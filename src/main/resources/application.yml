@@ -6,12 +6,12 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/management
     username: root
-    password: 1104
+    password: 1234
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -19,6 +19,16 @@ spring:
         default_batch_fetch_size: 100
         dialect: org.hibernate.dialect.MariaDBDialect
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 26118449609-05lcn7cjkq14bjabt7ek5i8jfm39dl7c.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - profile
+              - email
 # Swagger/OpenAPI 설정
 springdoc:
   api-docs:
