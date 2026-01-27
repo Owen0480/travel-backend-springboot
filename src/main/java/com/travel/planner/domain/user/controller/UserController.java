@@ -22,6 +22,9 @@ public class UserController {
     @Operation(summary = "성공 예제", description = "성공 예제")
     @GetMapping("/success")
     public ResponseEntity<BaseResponse> success(){
+//        return ResponseEntity
+//                .status(HttpStatus.CREATED)
+//                .body(BaseResponse.success(response));
         return ResponseEntity.ok(BaseResponse.success(null));
     }
 
