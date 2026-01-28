@@ -4,8 +4,16 @@ import com.travel.planner.domain.user.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -18,22 +26,35 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final com.travel.planner.global.oauth2.OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final com.travel.planner.global.jwt.TokenProvider tokenProvider;
+    private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable()) // 테스트를 위해 CSRF 비활성화
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**", "/css/**", "/favicon.ico", "/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/**", "/actuator/**").permitAll() 
-                        .anyRequest().authenticated() 
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/css/**", "/favicon.ico", "/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/**", "/actuator/**", "/ws-stomp/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) 
-                        )
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                );
+                                .oidcUserService(customOAuth2UserService)    // Google 등 OIDC 전용 서비스 등록)
+                        ).successHandler(oAuth2AuthenticationSuccessHandler)
+                )
+                .addFilterBefore(new com.travel.planner.global.jwt.JwtFilter(tokenProvider, redisTemplate), org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

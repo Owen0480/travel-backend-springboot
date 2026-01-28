@@ -2,12 +2,17 @@ package com.travel.planner.domain.user.service;
 
 import com.travel.planner.domain.user.entity.User;
 import com.travel.planner.domain.user.repository.UserRepository;
+import com.travel.planner.global.exception.BusinessException;
+import com.travel.planner.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -17,33 +22,36 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class CustomOAuth2UserService extends OidcUserService {
 
     private final UserRepository userRepository;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        // 구글에서 유저 정보를 가져옴
+        OidcUser oidcUser = super.loadUser(userRequest);
 
+        try {
+            return processOAuth2User(userRequest, oidcUser);
+        } catch (Exception ex) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "소셜 로그인 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    private OidcUser processOAuth2User(OidcUserRequest userRequest, OidcUser oidcUser) {
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        String userNameAttributeName = userRequest.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+        Map<String, Object> attributes = oidcUser.getAttributes();
 
-        Map<String, Object> attributes = oAuth2User.getAttributes();
         String email = (String) attributes.get("email");
         String name = (String) attributes.get("name");
-        
-        // Use the correct unique identifier based on the provider (e.g., 'sub' for Google)
-        String oauthId = String.valueOf(attributes.get(userNameAttributeName));
 
-        User user = saveOrUpdate(email, name, oauthId, registrationId);
+        // 구글의 고유 ID(sub)
+        String oauthId = oidcUser.getName();
 
-        return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())),
-                attributes,
-                userNameAttributeName
-        );
+        // DB 저장 및 업데이트
+        saveOrUpdate(email, name, oauthId, registrationId);
+
+        return oidcUser;
     }
 
     private User saveOrUpdate(String email, String name, String oauthId, String registrationId) {

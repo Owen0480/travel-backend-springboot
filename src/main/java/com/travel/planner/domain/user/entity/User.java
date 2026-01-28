@@ -20,6 +20,9 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(name = "password", length = 255)
+    private String password;
+
     @Column(name = "full_name", nullable = false, length = 50)
     private String fullName;
 
@@ -27,7 +30,7 @@ public class User extends BaseEntity {
     @Column(name = "oauth_provider", nullable = false, length = 20)
     private OAuthProvider oauthProvider;
 
-    @Column(name = "oauth_identifier", nullable = false, unique = true, length = 255)
+    @Column(name = "oauth_identifier", unique = true, length = 255)
     private String oauthIdentifier;
 
     @Enumerated(EnumType.STRING)
@@ -39,7 +42,7 @@ public class User extends BaseEntity {
     private UserStatus status;
 
     public enum OAuthProvider {
-        GOOGLE, KAKAO, NAVER, GITHUB
+        GOOGLE, KAKAO, NAVER, GITHUB, LOCAL
     }
 
     public enum UserRole {
