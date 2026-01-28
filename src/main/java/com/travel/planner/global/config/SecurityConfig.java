@@ -1,6 +1,8 @@
 package com.travel.planner.global.config;
 
 import com.travel.planner.domain.user.service.CustomOAuth2UserService;
+import com.travel.planner.global.jwt.TokenProvider;
+import com.travel.planner.global.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +27,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final com.travel.planner.global.oauth2.OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final com.travel.planner.global.jwt.TokenProvider tokenProvider;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final TokenProvider tokenProvider;
     private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
 
     @Bean
