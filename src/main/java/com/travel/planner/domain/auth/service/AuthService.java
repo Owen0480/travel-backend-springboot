@@ -102,12 +102,21 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String email, String accessToken) {
-        // 1. Refresh Token 삭제
-        refreshTokenRepository.deleteById(email);
+    public void logout(String name, String accessToken) {
+        // 1. Refresh Token 삭제 (Redis)
+        refreshTokenRepository.deleteById(name);
+    }
 
-        // 2. Access Token 블랙리스트 등록 (남은 유효시간만큼)
-        Long expiration = tokenProvider.getExpiration(accessToken);
-        redisTemplate.opsForValue().set(accessToken, "logout", expiration, java.util.concurrent.TimeUnit.MILLISECONDS);
+    @Transactional
+    public void withdrawByOauthIdentifier(String name, String accessToken) {
+        // 1. 토큰 및 세션 정리 (Access Token 블랙리스트 및 Refresh Token 삭제 로직 호출)
+        logout(name, accessToken);
+
+        // 2. DB에서 사용자 삭제 (email 또는 oauthIdentifier 중 하나로 조회하여 Local/OAuth 유저 모두 대응)
+        User user = userRepository.findByEmail(name)
+                .orElseGet(() -> userRepository.findByOauthIdentifier(name)
+                        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
+
+        userRepository.delete(user);
     }
 }

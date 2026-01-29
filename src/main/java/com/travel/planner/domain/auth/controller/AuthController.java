@@ -11,10 +11,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -62,6 +61,20 @@ public class AuthController {
             authService.logout(authentication.getName(), accessToken);
         }
         
+        CookieUtil.deleteCookie(request, response, "refreshToken");
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Void> withdraw(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String authHeader = request.getHeader("Authorization");
+        if (authentication != null && authentication.isAuthenticated() && authHeader != null && authHeader.startsWith("Bearer ")) {
+            String accessToken = authHeader.substring(7);
+            authService.withdrawByOauthIdentifier(authentication.getName(), accessToken);
+        }
+
         CookieUtil.deleteCookie(request, response, "refreshToken");
         return ResponseEntity.ok().build();
     }

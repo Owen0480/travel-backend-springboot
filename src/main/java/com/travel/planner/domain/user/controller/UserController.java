@@ -25,9 +25,9 @@ public class UserController {
 //        return ResponseEntity
 //                .status(HttpStatus.CREATED)
 //                .body(BaseResponse.success(response));
-        throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "오류오류이렇게쓰세요");
+//        throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "오류오류이렇게쓰세요");
 
-//        return ResponseEntity.ok(BaseResponse.success(null));
+        return ResponseEntity.ok(BaseResponse.success(null));
     }
 
     @Operation(summary = "실패 예제", description = "실패 예제")
