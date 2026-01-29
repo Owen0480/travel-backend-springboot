@@ -47,24 +47,27 @@ public class CustomOAuth2UserService extends OidcUserService {
 
         // 구글의 고유 ID(sub)
         String oauthId = oidcUser.getName();
+        String accessToken = userRequest.getAccessToken().getTokenValue();
 
         // DB 저장 및 업데이트
-        saveOrUpdate(email, name, oauthId, registrationId);
+        saveOrUpdate(email, name, oauthId, registrationId, accessToken);
 
         return oidcUser;
     }
 
-    private User saveOrUpdate(String email, String name, String oauthId, String registrationId) {
+    private User saveOrUpdate(String email, String name, String oauthId, String registrationId, String accessToken) {
         User user = userRepository.findByEmail(email)
                 .map(entity -> entity.toBuilder()
                         .fullName(name)
                         .oauthIdentifier(oauthId)
+                        .socialAccessToken(accessToken)
                         .build())
                 .orElse(User.builder()
                         .email(email)
                         .fullName(name)
                         .oauthProvider(User.OAuthProvider.valueOf(registrationId.toUpperCase()))
                         .oauthIdentifier(oauthId)
+                        .socialAccessToken(accessToken)
                         .role(User.UserRole.ROLE_USER)
                         .status(User.UserStatus.ACTIVE)
                         .build());
