@@ -41,6 +41,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserStatus status;
 
+    @Column(name = "social_access_token", length = 1000)
+    private String socialAccessToken;
+
     public enum OAuthProvider {
         GOOGLE, KAKAO, NAVER, GITHUB, LOCAL
     }

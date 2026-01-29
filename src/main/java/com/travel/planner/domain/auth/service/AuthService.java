@@ -9,13 +9,16 @@ import com.travel.planner.domain.user.entity.User;
 import com.travel.planner.domain.user.repository.UserRepository;
 import com.travel.planner.global.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -26,6 +29,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+    private final RestTemplate restTemplate;
 
     @Transactional
     public void register(RegisterRequestDto registerRequestDto) {
@@ -120,11 +124,28 @@ public class AuthService {
         // 1. 토큰 및 세션 정리 (Access Token 블랙리스트 및 Refresh Token 삭제 로직 호출)
         logout(name, accessToken);
 
-        // 2. DB에서 사용자 삭제 (email 또는 oauthIdentifier 중 하나로 조회하여 Local/OAuth 유저 모두 대응)
+        // 2. 사용자 조회
         User user = userRepository.findByEmail(name)
                 .orElseGet(() -> userRepository.findByOauthIdentifier(name)
                         .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
 
+        // 3. 소셜 계정인 경우 연동 해제 요청 (Google)
+        if (user.getOauthProvider() == User.OAuthProvider.GOOGLE && user.getSocialAccessToken() != null) {
+            revokeGoogleToken(user.getSocialAccessToken());
+        }
+
+        // 4. DB에서 사용자 삭제
         userRepository.delete(user);
+    }
+
+    private void revokeGoogleToken(String token) {
+        try {
+            String url = "https://oauth2.googleapis.com/revoke?token=" + token;
+            restTemplate.postForObject(url, null, String.class);
+            log.info("Google OAuth2 token revoked successfully.");
+        } catch (Exception e) {
+            log.warn("Failed to revoke Google OAuth2 token: {}", e.getMessage());
+            // 토큰이 이미 만료되었거나 다른 이슈로 실패할 수 있으나, 회원 탈퇴 자체는 진행함
+        }
     }
 }
