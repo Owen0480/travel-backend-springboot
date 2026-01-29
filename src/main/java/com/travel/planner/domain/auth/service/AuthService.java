@@ -105,6 +105,14 @@ public class AuthService {
     public void logout(String name, String accessToken) {
         // 1. Refresh Token 삭제 (Redis)
         refreshTokenRepository.deleteById(name);
+
+        // 2. Access Token 블랙리스트 등록 (남은 유효시간만큼) - 서버 측에서의 무효화("삭제")
+        if (accessToken != null) {
+            Long expiration = tokenProvider.getExpiration(accessToken);
+            if (expiration > 0) {
+                redisTemplate.opsForValue().set(accessToken, "logout", expiration, java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     @Transactional
