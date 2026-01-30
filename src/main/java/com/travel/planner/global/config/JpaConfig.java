@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaAuditing
-@EnableJpaRepositories(basePackages = "com.travel.planner.domain.user")
+@EnableJpaRepositories(basePackages = { "com.travel.planner.domain.user", "com.travel.planner.domain.conversation" })
 public class JpaConfig {
 }
