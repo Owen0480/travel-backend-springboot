@@ -50,7 +50,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("accessToken", accessToken)
-                .queryParam("email", authentication.getName())
                 .build().toUriString();
     }
 }
