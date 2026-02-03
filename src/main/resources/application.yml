@@ -1,3 +1,6 @@
+server:
+  port: 8081   # 8080 충돌 시 8081 사용
+
 spring:
   application:
     name: planner
@@ -18,7 +21,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/travel?createDatabaseIfNotExist=true
     username: root
-    password: 1104
+    password: 1234
 
   data:
     redis:
@@ -75,8 +78,8 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 jwt:
-  # Must be Base64-encoded; min 64 bytes decoded for HS512. Example: echo -n "64-byte-string..." | base64
-  secret: ${JWT_SECRET}
+  # Must be Base64-encoded; min 64 bytes decoded for HS512. 로컬 확인용 기본값(배포 시 반드시 JWT_SECRET 설정)
+  secret: ${JWT_SECRET:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYW==}
   access-token-validity-in-seconds: 3600 # 1 hour
   refresh-token-validity-in-seconds: 1209600 # 2 weeks
 
