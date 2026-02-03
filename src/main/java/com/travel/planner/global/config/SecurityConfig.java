@@ -1,6 +1,7 @@
 package com.travel.planner.global.config;
 
 import com.travel.planner.domain.user.service.CustomOAuth2UserService;
+import com.travel.planner.global.jwt.JwtAuthenticationEntryPoint;
 import com.travel.planner.global.jwt.TokenProvider;
 import com.travel.planner.global.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,9 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final TokenProvider tokenProvider;
+
     private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -55,6 +58,9 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(customOAuth2UserService)    // Google 등 OIDC 전용 서비스 등록)
                         ).successHandler(oAuth2AuthenticationSuccessHandler)
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
                 .addFilterBefore(new com.travel.planner.global.jwt.JwtFilter(tokenProvider, redisTemplate), org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
