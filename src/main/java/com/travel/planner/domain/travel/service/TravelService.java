@@ -1,5 +1,6 @@
 package com.travel.planner.domain.travel.service;
 
+import com.travel.planner.domain.travel.dto.TravelResponseDto;
 import com.travel.planner.global.util.ExternalApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,14 +18,14 @@ public class TravelService {
     @Value("${external.fastapi.url}")
     private String fastApiBaseUrl;
 
-    public Map<String, Object> getTravelRecommendation(String message) {
+    public TravelResponseDto getTravelRecommendation(String message) {
         String fastApiUrl = fastApiBaseUrl + "/api/v1/travel/travel";
         Map<String, Object> requestBody = Map.of("message", message);
 
         return externalApiService.post(
                 fastApiUrl,
                 requestBody,
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+                new ParameterizedTypeReference<TravelResponseDto>() {}
         );
     }
 }

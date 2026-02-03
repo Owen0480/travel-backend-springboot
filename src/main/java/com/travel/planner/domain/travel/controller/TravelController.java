@@ -1,5 +1,6 @@
 package com.travel.planner.domain.travel.controller;
 
+import com.travel.planner.domain.travel.dto.TravelResponseDto;
 import com.travel.planner.domain.travel.service.TravelService;
 import com.travel.planner.global.common.dto.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class TravelController {
     @PostMapping("/test")
     public ResponseEntity<BaseResponse> test(@RequestBody Map<String, Object> body) {
         String message = body.getOrDefault("message", "테스트 메시지").toString();
-        Map<String, Object> response = travelService.getTravelRecommendation(message);
+        TravelResponseDto response = travelService.getTravelRecommendation(message);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
 }
