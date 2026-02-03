@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**", "/css/**", "/favicon.ico", "/api/auth/**", "/api/v1/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**", "/ws-stomp/**").permitAll()
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/css/**", "/favicon.ico", "/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/**", "/ws-stomp/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
