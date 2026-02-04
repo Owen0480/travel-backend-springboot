@@ -1,5 +1,5 @@
 server:
-  port: 8081   # 8080 충돌 시 8081 사용
+  port: 8080   # 8080 충돌 시 8081 사용
 
 spring:
   application:
@@ -21,7 +21,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/travel?createDatabaseIfNotExist=true
     username: root
-    password: 1234
+    password: 1104
 
   data:
     redis:
@@ -42,16 +42,12 @@ spring:
 # Swagger/OpenAPI 설정
 springdoc:
   api-docs:
-    path: /api/v1
+    path: /v3/api-docs
     enabled: true
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
-    tags-sorter: alpha
-    operations-sorter: alpha
-    display-request-duration: true
-    disable-swagger-default-url: true
-    doc-expansion: none
+    # springdoc의 기본 설정들을 따르도록 간소화하거나 명확한 경로만 지정
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
   paths-to-match:
@@ -79,7 +75,7 @@ logging:
 
 jwt:
   # Must be Base64-encoded; min 64 bytes decoded for HS512. 로컬 확인용 기본값(배포 시 반드시 JWT_SECRET 설정)
-  secret: ${JWT_SECRET:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYW==}
+  secret: ${JWT_SECRET}
   access-token-validity-in-seconds: 3600 # 1 hour
   refresh-token-validity-in-seconds: 1209600 # 2 weeks
 
