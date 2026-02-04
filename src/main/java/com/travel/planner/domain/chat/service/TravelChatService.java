@@ -31,14 +31,21 @@ public class TravelChatService {
                 .threadId(threadId)
                 .build();
 
-        log.debug("Sending travel chat request to FastAPI: {}, threadId: {}", url, threadId);
+        log.info("Sending request to FastAPI: {} | message: {} | threadId: {}", url, message, threadId);
 
         return webClient.post()
                 .uri(url)
                 .bodyValue(requestDto)
                 .retrieve()
+                .onStatus(status -> status.isError(), response -> {
+                    return response.bodyToMono(String.class)
+                            .flatMap(errorBody -> {
+                                log.error("FastAPI Error Response: {} | Body: {}", response.statusCode(), errorBody);
+                                return Mono.error(new RuntimeException("FastAPI 호출 실패: " + response.statusCode()));
+                            });
+                })
                 .bodyToMono(TravelChatResponseDto.class)
-                .doOnNext(response -> log.debug("Received response from FastAPI: {}", response))
-                .doOnError(error -> log.error("Error calling FastAPI: {}", error.getMessage()));
+                .doOnNext(response -> log.info("Received response from FastAPI: {}", response))
+                .doOnError(error -> log.error("WebClient Error: {}", error.getMessage()));
     }
 }
