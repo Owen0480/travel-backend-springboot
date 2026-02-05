@@ -2,6 +2,10 @@ server:
   port: 8080   # 8080 충돌 시 8081 사용
 
 spring:
+  mvc:
+    async:
+      request-timeout: 600000  # 10분 (600초 = 600,000ms)
+
   application:
     name: planner
 
@@ -81,4 +85,4 @@ jwt:
 
 external:
   fastapi:
-    url: http://localhost:8000
+    url: http://127.0.0.1:8000
