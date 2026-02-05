@@ -24,7 +24,7 @@ public class RecommendService {
     @Value("${external.fastapi.url}")
     private String fastApiBaseUrl;
 
-    public Map<String, Object> analyzeImage(MultipartFile file) {
+    public Map<String, Object> analyzeImage(MultipartFile file, String preference) {
         String url = fastApiBaseUrl + "/api/v1/recommend/analyze";
 
         HttpHeaders headers = new HttpHeaders();
@@ -40,6 +40,9 @@ public class RecommendService {
             });
         } catch (Exception e) {
             throw new RuntimeException("이미지 읽기 실패", e);
+        }
+        if (preference != null) {
+            body.add("preference", preference);
         }
 
         HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);

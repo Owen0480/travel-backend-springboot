@@ -21,9 +21,10 @@ public class RecommendController {
 
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeImage(
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "preference", required = false) String preference
     ) {
-        Map<String, Object> result = recommendService.analyzeImage(file);
+        Map<String, Object> result = recommendService.analyzeImage(file, preference);
         return ResponseEntity.ok(result);
     }
 }
