@@ -56,7 +56,7 @@ public class ChatPlanService {
     private final WebClient webClient;
     private final GridFsTemplate gridFsTemplate;
 
-    @Value("${external.fastapi.url}")
+    @Value("${external.fastapi.url2}")
     private String fastApiBaseUrl;
 
     @Value("${planner.plan.base-dir:files/plans}")
