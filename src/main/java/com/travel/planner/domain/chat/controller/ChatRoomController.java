@@ -76,4 +76,12 @@ public class ChatRoomController {
         List<ChatMessageResponse> messages = chatRoomService.getMessages(roomId, Math.min(limit, 500));
         return ResponseEntity.ok(BaseResponse.success(messages));
     }
+
+    @Operation(summary = "채팅방 나가기", description = "현재 사용자를 채팅방 참여자에서 제거합니다.")
+    @PostMapping("/{roomId}/leave")
+    public ResponseEntity<BaseResponse<Void>> leave(@PathVariable String roomId) {
+        UserInfoResponse user = userService.getCurrentUserInfo();
+        chatRoomService.leaveRoom(roomId, String.valueOf(user.getUserId()));
+        return ResponseEntity.ok(BaseResponse.success(null));
+    }
 }

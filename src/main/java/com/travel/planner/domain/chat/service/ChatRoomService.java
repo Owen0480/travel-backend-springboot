@@ -23,6 +23,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatPlanService chatPlanService;
 
     public ChatRoomResponse createRoom(String userId, String userName, ChatRoomCreateRequest request) {
         ChatRoom room = ChatRoom.create(
@@ -71,6 +72,23 @@ public class ChatRoomService {
                 .stream()
                 .map(ChatMessageResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    /** 채팅방 나가기: 참여자에서 제거. 마지막 참여자가 나가면 해당 방의 메시지·PDF·채팅방을 모두 삭제합니다. */
+    public void leaveRoom(String roomId, String userId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "채팅방을 찾을 수 없습니다."));
+        if (room.getParticipantUserIds() == null) {
+            return;
+        }
+        room.getParticipantUserIds().remove(userId);
+        if (room.getParticipantUserIds().isEmpty()) {
+            chatMessageRepository.deleteByRoomId(roomId);
+            chatPlanService.deleteAllPlansByRoomId(roomId);
+            chatRoomRepository.delete(room);
+        } else {
+            chatRoomRepository.save(room);
+        }
     }
 
     public ChatMessageWsDto saveAndToWsDto(String roomId, String senderUserId, String senderUserName, String content) {

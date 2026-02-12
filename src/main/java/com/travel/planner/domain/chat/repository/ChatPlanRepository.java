@@ -8,5 +8,7 @@ import java.util.List;
 public interface ChatPlanRepository extends MongoRepository<ChatPlan, String> {
 
     List<ChatPlan> findByRoomIdOrderByCreatedAtDesc(String roomId);
+
+    Long deleteByRoomId(String roomId);
 }
 

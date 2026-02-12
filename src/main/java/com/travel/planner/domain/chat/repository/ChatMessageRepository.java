@@ -9,4 +9,6 @@ import java.util.List;
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
 
     List<ChatMessage> findByRoomIdOrderByCreatedAtAsc(String roomId, Pageable pageable);
+
+    Long deleteByRoomId(String roomId);
 }

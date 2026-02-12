@@ -283,4 +283,19 @@ public class ChatPlanService {
         }
         return plan;
     }
+
+    /** 해당 채팅방의 모든 일정(PDF)을 GridFS 및 DB에서 삭제. 방 삭제 시 호출. */
+    public void deleteAllPlansByRoomId(String roomId) {
+        List<ChatPlan> plans = chatPlanRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+        for (ChatPlan plan : plans) {
+            if (plan.getGridFsFileId() != null) {
+                try {
+                    gridFsTemplate.delete(new Query(Criteria.where("_id").is(new ObjectId(plan.getGridFsFileId()))));
+                } catch (Exception e) {
+                    log.warn("Failed to delete GridFS file for plan: planId={}", plan.getId(), e);
+                }
+            }
+        }
+        chatPlanRepository.deleteByRoomId(roomId);
+    }
 }
