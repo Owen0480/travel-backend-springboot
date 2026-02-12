@@ -23,7 +23,7 @@ spring:
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/travel?createDatabaseIfNotExist=true
+    url: jdbc:mariadb://127.0.0.1:3306/travel?createDatabaseIfNotExist=true
     username: root
     password: 1104
 
